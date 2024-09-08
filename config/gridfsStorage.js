@@ -1,5 +1,5 @@
-const { GridFsStorage } = require("multer-gridfs-storage");
-const path = require("path");
+import { GridFsStorage } from "multer-gridfs-storage";
+import path from "path";
 
 // MongoDB URI
 const mongoURI =
@@ -28,4 +28,4 @@ storage.on("error", (err) => {
   console.error("GridFS Storage Error:", err);
 });
 
-module.exports = storage;
+export default storage;

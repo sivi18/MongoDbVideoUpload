@@ -1,7 +1,7 @@
-const express = require("express");
-const multer = require("multer");
-const mongoose = require("mongoose");
-const storage = require("../config/gridfsStorage");
+import express from "express";
+import multer from "multer";
+import mongoose from "mongoose";
+import storage from "../config/gridfsStorage.js";
 
 // Initialize router
 const router = express.Router();
@@ -76,4 +76,23 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+// @route GET /api/videos
+// @desc Get all videos
+router.get("/", async (req, res) => {
+  const gfs = req.app.locals.gfs;
+
+  try {
+    const files = await gfs.find().toArray();
+
+    if (!files || files.length === 0) {
+      return res.status(404).json({ error: "No files found" });
+    }
+
+    res.status(200).json(files);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while fetching files" });
+  }
+});
+
+export default router;

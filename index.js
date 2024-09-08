@@ -1,6 +1,6 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const videoRoutes = require("./routes/video");
+import express from "express";
+import mongoose from "mongoose";
+import videoRoutes from "./routes/video.js";
 
 // Initialize the app
 const app = express();
