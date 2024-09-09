@@ -1,98 +1,21 @@
 import express from "express";
 import multer from "multer";
-import mongoose from "mongoose";
-import storage from "../config/gridfsStorage.js";
+import storage from "../middleware/gridfsStorage.js";
+import {
+  uploadVideo,
+  getVideoById,
+  deleteVideoById,
+  getAllVideos,
+} from "../controllers/VideoController.js";
 
-// Initialize router
+// Initialize router and multer storage
 const router = express.Router();
 const upload = multer({ storage });
 
-// @route POST /api/videos/upload
-// @desc Upload video to DB
-router.post("/upload", upload.single("file"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-    console.log(req.file); // Check if file is available
-    res.status(201).json({ file: req.file });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "An error occurred during file upload" });
-  }
-});
-
-// @route GET /api/videos/:id
-// @desc Get a video by ID
-router.get("/:id", async (req, res) => {
-  const gfs = req.app.locals.gfs;
-  const { id } = req.params;
-
-  if (!id) {
-    return res.status(400).json({ error: "ID is required" });
-  }
-
-  try {
-    const _id = new mongoose.Types.ObjectId(id);
-
-    const files = await gfs.find({ _id }).toArray();
-
-    if (!files || files.length === 0) {
-      return res.status(404).json({ error: "File not found" });
-    }
-
-    res.set({
-      "Content-Type": files[0].contentType,
-      "Content-Disposition": `attachment; filename="${files[0].filename}"`,
-    });
-
-    const readStream = gfs.openDownloadStream(_id);
-    readStream.pipe(res); // Stream video file
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "An error occurred while fetching the file" });
-  }
-});
-
-// @route DELETE /api/videos/:id
-// @desc Delete a video by ID
-router.delete("/:id", async (req, res) => {
-  const gfs = req.app.locals.gfs;
-  const { id } = req.params;
-
-  if (!id) {
-    return res.status(400).json({ error: "ID is required" });
-  }
-
-  try {
-    const _id = new mongoose.Types.ObjectId(id);
-
-    await gfs.delete(_id);
-
-    res.status(200).json({ message: "File deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "An error occurred during deletion" });
-  }
-});
-
-// @route GET /api/videos
-// @desc Get all videos
-router.get("/", async (req, res) => {
-  const gfs = req.app.locals.gfs;
-
-  try {
-    const files = await gfs.find().toArray();
-
-    if (!files || files.length === 0) {
-      return res.status(404).json({ error: "No files found" });
-    }
-
-    res.status(200).json(files);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "An error occurred while fetching files" });
-  }
-});
+// Define routes using controller methods
+router.post("/upload", upload.single("file"), uploadVideo);
+router.get("/:id", getVideoById);
+router.delete("/:id", deleteVideoById);
+router.get("/", getAllVideos);
 
 export default router;
