@@ -85,8 +85,9 @@ function VideoComponent() {
             <div className="flex items-center justify-between w-full mt-auto">
               <div className="flex flex-col gap-2">
                 <h2 className="text-white text-lg select-none">
-                  {video.filename.split("-")[0] || "Title"}
+                  {video.filename.match(/^[^.\\-]+/)[0] || "Title"}
                 </h2>
+
                 <Timelayout time={video.uploadDate} />
               </div>
               <button

@@ -2,11 +2,13 @@
 import express from "express";
 import connectDB from "./config/DbConnection.js";
 import videoRoutes from "./routes/video.js";
+import expressFormidable from "express-formidable";
 import cors from "cors";
 // Initialize the app
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
+// app.use(expressFormidable());
 app.use(
   cors({
     origin: "http://localhost:5173",

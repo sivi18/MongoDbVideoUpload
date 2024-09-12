@@ -1,14 +1,34 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
+import connectDB from "../config/DbConnection.js";
+import { Readable } from "stream";
+import path from "path";
 
 // @desc Upload video to DB
 // @route POST /api/videos/upload
 const uploadVideo = asyncHandler(async (req, res) => {
   if (!req.file) {
-    res.status(400).json({ error: "No file uploaded" });
-    return;
+    return res.status(400).send("No file uploaded.");
   }
-  res.status(201).json({ file: req.file });
+
+  const { gfs, conn } = await connectDB();
+
+  const readableStream = Readable.from(req.file.buffer);
+  const filename = `${path.basename(
+    file.originalname,
+    path.extname(file.originalname)
+  )}-${Date.now()}${path.extname(file.originalname)}`;
+
+  const uploadStream = gfs.openUploadStream(filename);
+  readableStream
+    .pipe(uploadStream)
+    .on("error", (err) => {
+      console.error("Error uploading file:", err);
+      return res.status(500).send({ message: "Error uploading file." });
+    })
+    .on("finish", () => {
+      return res.status(201).json({ message: "File uploaded successfully." });
+    });
 });
 
 // @desc Get a video by ID
